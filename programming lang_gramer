@@ -1,0 +1,147 @@
+! Welcome to GOLD Parser Builder 5.2
+"Start Symbol" = <Program>
+               
+!------------------
+! Character sets
+!__________________
+
+{WS}           = {Whitespace}  - {CR} - {LF}
+{String Chars} = {Pribtable} + {HT} - ["]
+               
+!-------------------
+! Terminals
+!-------------------
+integer = {digit}+
+floar = {digit}+ '.' {digit}+
+! The following defines the Whitespace terminal using the {WS}
+! set - which excludes the carriage return and line feed
+! characters
+
+Whitespace = {WS}+
+NewLine = {CR}{LF} | {CR} | {LF}
+
+Identifier = {Letter} {AlphaNumeric}*
+StringLiteral = '"' {String Chars}* '"'
+
+
+!-------------------
+!Rules
+!-------------------
+
+! The following rule defines a series of newline tokens.
+! Use this rule rather than the newline terminal.
+
+<nl> ::= NewLine <nl> !One or more
+      | NewLine
+      
+<nl Opt> ::= NewLine <nl Opt> !'Zero or more
+      | !Empty   
+
+! <nl opt> removes biank lines before first statement
+
+!<Start> ::= <nl opt> <Program
+
+<Program> ::= start <nl <first> end
+           
+<first> ::= <declaration> | <statement>
+         
+<declaration> ::= <decl> <nlb>               
+             | <decl> <nlb <declaration>
+
+<decl> ::= <type> Identifier ';'
+        
+<statement> ::= <assign> <nl>
+
+             | <init> <nl>
+             | <lw> <nl>
+             | <qaren> <nl>
+             | <talma> <nl>
+             | <nfztalma> <nl>
+             | <lkol> <nl>
+             | <lkolqema> <nl>
+             | <expr> <nl>
+             | <comment> <nl>
+             | <Expression> <nl>
+             | <n1> <statement>
+             | <method>
+             | <method_calling>
+             
+<assignment> ::= <assign> <nl>
+             | <assign> <nl> <assignment>
+             
+<assign> ::= Identifier '=' <value> ';'
+          
+<initialization> ::= <init> <nl>
+                  | <init> <nl> <initialization>
+                  
+<init> ::= <type> <assign>
+        
+<type> ::= int | double | char | string
+        
+<condition> ::= <cond>
+             | <cond> '||' <condition>
+             | <cond> '&&' <condition>
+             
+<cond> ::= <value> '<' <value>
+        | <value> '>' <value>
+        | <value> '<=' <value>
+        | <value> '>=' <value>
+        | <value> '==' <value>
+        | <value> '!=' <value>
+        
+! Method
+<method> ::= void <method name> '('')' <nl> '{' <nl> <statement> <nl> '}'
+          
+<method name> ::= StringLiteral
+               
+! Method Calling
+<method calling> ::= Stringliteral '('')'';'
+                  
+! lw = if statement and awlw = else if statement
+ <lw> ::= lw 7sl '(' <condition> ')' e3ml da '{' <nl> <statement> <nl> '}'
+       | lw 7sl '(' <conditiom> ')' e3ml da '{' <n1> <statement> <n1> '}' <nl> yeb2a e3ml da '[' <nl> <statement> <nl> '}'
+       | lw 7sl '(' <condition> ')' e3ml da '{' <nl> <statement> <n1> '}' <awlw>
+       | lw 7sl '(' <condition> ')' eaml da '{' <nl> <statement> <nl> '}' <nl> <awlw> <nl> yeb2a e3ml da '{' <nl> <statement> <nl> '}'
+       
+<awlw> ::= aw lw 7sl '(' <condition> ')' e3ml da '{' <nl> <statement> <nl> '}' <nl>
+        | aw lw 7sl '(' <condition> ')' e3ml da '{' <nl> <statement> <nl> '}' <nl> <awlw>
+        
+!qaren = switch statement and case = grb instruction
+<qaren> ::= qaren '(' <value> ')' '(' <nl> <grb> <nl> '}' yeb2a e3al da '{' <nl> <statement> <nl> '}'
+         
+<grb> ::= grb <value> ':' <nl> <statement> <nl>
+       | grb <value> ':’ <nl> <statement> <nl> <grb>
+       
+!talma = while statement
+<talma> ::= talma '(' <condition> ')' <nl> nfz da '{' <nl> <statement> <nl> <expr> <nl>'}'
+         
+! nfz talma = do while statement and nfz = do instruction
+<nfztalma> ::= nfz '{' <nl> <statement> <nl> <expr> <nl> '}' talma '(' <condition> ')'
+            
+! lkol = for statement
+<lkol> ::= lkol '(' <init> ';' <condition> ';' <expr> ')' <nl> nfz '{' <nl> <statement> <nl> '}'
+        
+! lkol qema = foreach statement
+<lkolqgema> ::= lkol qema '(' <init> ':' <value> ')' <nl> nfz '{' <nl> <statement> <nl> '}'
+             
+<expr> ::= <value> '++'
+        | <value> '--'
+        
+<comment> ::= '/* ' StringLiteral ' */'
+           
+<Expression> ::= <Expression> '+' <Mult Exp>
+              | <Expression> '-' <Mult Exp>
+              | <Mult Exp>
+              
+<Mult Exp>   ::= <Mult Exp> '*' <Negate Exp>
+              | <Mult Exp> '/' <Negate Exp>
+              | <Negate Exp>
+              
+<Negate Exp> ::= '-' <Value>
+              | <Value>
+               
+!Add more values to the rule below - as needed
+
+<Value>      ::= Identifier
+              | '(' <Expression> ')'
+              
